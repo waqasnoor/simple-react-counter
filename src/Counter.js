@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 
-const readFromLocalStorage = (key, init) => {
-  const data = localStorage.getItem(key);
-  return data ? parseInt(data) : init;
+const useLocalStorage = (initialState, key) => {
+  const get = () => {
+    const data = localStorage.getItem(key);
+    return data ? parseInt(data) : initialState;
+  };
+  const [value, setValue] = useState(get());
+  useEffect(() => {
+    localStorage.setItem(key, value);
+  }, [value]);
+  return [value, setValue];
 };
 
-const writeToLocalStorage = (key, value) => {
-  if (value === undefined) return;
-  localStorage.setItem(key, value);
-};
 const Counter = ({ max, min, step }) => {
-  const [counter, setCounter] = useState(readFromLocalStorage('counter', 0));
+  const [counter, setCounter] = useLocalStorage(0, 'counter');
 
   const increment = () =>
     setCounter((counter) => (counter >= max ? counter : counter + step));
@@ -18,10 +21,6 @@ const Counter = ({ max, min, step }) => {
     setCounter((counter) => (counter <= min ? counter : counter - step));
   const reset = () => setCounter(() => 0);
 
-  useEffect(() => {
-    writeToLocalStorage('counter', counter);
-    document.title = 'Counter : ' + counter;
-  }, [counter]);
   return (
     <div className="Counter">
       <p className="count">{counter}</p>
