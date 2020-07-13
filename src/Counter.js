@@ -16,20 +16,36 @@ const reset = (state) => {
   return { ...state, counter: 0 };
 };
 
+const readFromLocalStorage = (key, init) => {
+  const data = localStorage.getItem(key);
+  if (data) return JSON.parse(data);
+  return init;
+};
+
+const writeToLocalStorage = (key, value) => {
+  if (!value) return;
+  localStorage.setItem(key, JSON.stringify(value));
+};
 class Counter extends Component {
   constructor(props) {
     super(props);
-    this.state = { counter: 0 };
+    this.state = readFromLocalStorage('state', { counter: 0 });
     this.updateCounter = this.updateCounter.bind(this);
   }
   updateCounter(type) {
+    const updateLocalStorage = () => {
+      writeToLocalStorage('state', this.state);
+    };
     switch (type) {
       case 'increment':
-        return this.setState(increment);
+        return this.setState(increment, updateLocalStorage);
       case 'decrement':
-        return this.setState(decrement);
+        return this.setState(decrement, updateLocalStorage);
       case 'reset':
-        return this.setState(reset);
+        return this.setState(reset, updateLocalStorage);
+
+      default:
+        return;
     }
   }
 
